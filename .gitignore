@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+.env
+.venv/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Virtual environments
+activate_env.bat
+activate_venv.sh
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Data files (optional - you may want to keep some)
+data/uploads/
+data/processed/
+data/external/
+*.mp4
+*.avi
+*.mov
+
+# Model files (large files)
+*.pt
+*.pth
+*.onnx
+models/best.pt
+models/yolov8n.pt
+
+# Node modules and build files
+node_modules/
+react-frontend/build/
+react-frontend/nul
+
+# Docker
+.dockerignore
+
+# Temporary files
+*.tmp
+*.temp
+nul

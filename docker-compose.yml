@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Python Flask API Backend
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: python-backend
+    container_name: vehicle-damage-api
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data/uploads:/app/data/uploads
+      - ./data/processed:/app/data/processed
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+      - PYTHONPATH=/app
+    networks:
+      - vehicle-damage-network
+    restart: unless-stopped
+
+  # Nginx with React Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: nginx-frontend
+    container_name: vehicle-damage-frontend
+    ports:
+      - "80:80"
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - vehicle-damage-network
+    restart: unless-stopped
+
+networks:
+  vehicle-damage-network:
+    driver: bridge
