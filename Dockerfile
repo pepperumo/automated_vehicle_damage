@@ -58,9 +58,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Create necessary directories for data processing
 RUN mkdir -p data/uploads data/processed models src/backend
 
-# Copy the YOLO model files
+# Copy the custom trained YOLO model (required for inference)
 COPY models/best.pt models/
-COPY models/yolov8n.pt models/
 
 # Copy API backend source code only
 COPY src/backend/ src/backend/

@@ -27,16 +27,13 @@ torch.load = patched_torch_load
 basepath = os.path.dirname(__file__)
 models_dir = os.path.abspath(os.path.join(basepath, '../../models'))
 best_model_path = os.path.join(models_dir, 'best.pt')
-default_model_path = os.path.join(models_dir, 'yolov8n.pt')
 
-# Check if custom model file exists
+# Load the custom trained model for vehicle damage detection
 if os.path.exists(best_model_path):
     print(f"Loading custom vehicle damage detection model from: {best_model_path}")
     model = YOLO(best_model_path)
 else:
-    print(f"Warning: Custom model not found at {best_model_path}")
-    print(f"Using default YOLOv8 model from: {default_model_path}")
-    model = YOLO(default_model_path)
+    raise FileNotFoundError(f"Required custom model not found at {best_model_path}. Please ensure best.pt is available.")
 
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'png'])
 PORT_NUMBER = 5000
