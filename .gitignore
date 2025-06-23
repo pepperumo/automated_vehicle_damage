@@ -42,7 +42,9 @@ data/external/
 *.pt
 *.pth
 *.onnx
-models/best.pt
+# Allow the custom trained model
+!models/best.pt
+# Exclude the base YOLOv8 model (can be downloaded)
 models/yolov8n.pt
 
 # Node modules and build files
