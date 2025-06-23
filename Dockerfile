@@ -1,4 +1,8 @@
-# Multi-stage Dockerfile for Vehicle Damage Detection Application - Optimized
+# Multi-stage Dockerfile for Vehicle Damage Detection Application
+# Supports both Docker Compose (separate containers) and single container deployment
+
+# Build argument to determine deployment type
+ARG DEPLOYMENT_TYPE=compose
 
 # Stage 1: Build React Frontend
 FROM node:18-alpine AS frontend-builder
@@ -17,13 +21,16 @@ COPY react-frontend/ ./
 # Build the React app
 RUN npm run build
 
-# Stage 2: Python API Backend - Optimized for Size
+# Stage 2: Python API Backend
 FROM python:3.12.0-slim AS python-backend
+
+# Build argument to determine deployment type
+ARG DEPLOYMENT_TYPE=compose
 
 # Set working directory
 WORKDIR /app
 
-# Install only essential system dependencies and clean up in same layer
+# Install system dependencies based on deployment type
 RUN apt-get update && apt-get install -y \
     # Essential libraries for OpenCV and basic image processing
     libglib2.0-0 \
@@ -33,15 +40,19 @@ RUN apt-get update && apt-get install -y \
     libgomp1 \
     libjpeg62-turbo \
     libpng16-16 \
-    # OpenGL libraries for OpenCV headless
     libgl1-mesa-glx \
-    libglib2.0-0 \
     # Network tools for health checks
     curl \
     # Build tools (will be removed after pip install)
     gcc \
     g++ \
     && rm -rf /var/lib/apt/lists/*
+
+# Install nginx and supervisor for single container deployment
+RUN if [ "$DEPLOYMENT_TYPE" = "single" ]; then \
+        apt-get update && apt-get install -y nginx supervisor && \
+        rm -rf /var/lib/apt/lists/*; \
+    fi
 
 # Copy requirements and install Python dependencies in single layer
 COPY requirements.txt .
@@ -61,8 +72,45 @@ RUN mkdir -p data/uploads data/processed models src/backend
 # Copy the custom trained YOLO model (required for inference)
 COPY models/best.pt models/
 
-# Copy API backend source code only
+# Copy API backend source code
 COPY src/backend/ src/backend/
+
+# For single container deployment, also copy frontend files and configs
+COPY --from=frontend-builder /app/frontend/build /var/www/html/
+COPY nginx/render.conf /etc/nginx/sites-available/render.conf
+
+# Create startup script that handles both deployment modes
+RUN echo '#!/bin/bash\n\
+if [ "$DEPLOYMENT_TYPE" = "single" ]; then\n\
+    # Setup nginx for single container\n\
+    rm -f /etc/nginx/sites-enabled/default\n\
+    ln -sf /etc/nginx/sites-available/render.conf /etc/nginx/sites-enabled/\n\
+    # Create supervisor config\n\
+    cat > /etc/supervisor/conf.d/supervisord.conf << EOF\n\
+[supervisord]\n\
+nodaemon=true\n\
+\n\
+[program:nginx]\n\
+command=nginx -g "daemon off;"\n\
+autostart=true\n\
+autorestart=true\n\
+\n\
+[program:flask]\n\
+command=python src/backend/app.py\n\
+directory=/app\n\
+autostart=true\n\
+autorestart=true\n\
+stdout_logfile=/dev/stdout\n\
+stdout_logfile_maxbytes=0\n\
+stderr_logfile=/dev/stderr\n\
+stderr_logfile_maxbytes=0\n\
+EOF\n\
+    # Start supervisor\n\
+    exec /usr/bin/supervisord\n\
+else\n\
+    # Compose mode - just run Flask API\n\
+    exec python src/backend/app.py\n\
+fi' > /app/start.sh && chmod +x /app/start.sh
 
 # Set environment variables
 ENV FLASK_APP=src/backend/app.py
@@ -71,17 +119,17 @@ ENV PYTHONPATH=/app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Expose API port
-EXPOSE 5000
+# Expose ports
+EXPOSE 5000 80
 
-# Health check for API endpoint
+# Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/health || exit 1
+    CMD curl -f http://localhost:5000/health || curl -f http://localhost/health || exit 1
 
-# Run the Flask API application
-CMD ["python", "src/backend/app.py", "--port", "5000"]
+# Use startup script that handles both modes
+CMD ["/app/start.sh"]
 
-# Stage 3: Nginx with React Frontend
+# Stage 3: Nginx with React Frontend (for Docker Compose)
 FROM nginx:alpine AS nginx-frontend
 
 # Copy React build files from frontend-builder stage

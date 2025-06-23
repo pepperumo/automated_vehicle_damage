@@ -2,10 +2,14 @@ services:
   - type: web
     name: vehicle-damage-detector
     env: docker
-    dockerfilePath: ./Dockerfile.render
+    dockerfilePath: ./Dockerfile
+    dockerBuildArgs:
+      DEPLOYMENT_TYPE: single
     healthCheckPath: /health
     plan: starter
     envVars:
+      - key: DEPLOYMENT_TYPE
+        value: single
       - key: FLASK_ENV
         value: production
       - key: PYTHONPATH
