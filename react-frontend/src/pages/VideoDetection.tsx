@@ -22,20 +22,20 @@ const VideoDetection: React.FC = () => {
     reset();
     setVideoUrl(null);
   };
-
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold text-gray-900">Video Damage Detection</h1>
-        <p className="text-gray-600">
-          Upload a video file to analyze vehicle damage frame by frame using our AI system.
-        </p>
-      </div>
+      {/* Header and Upload Section - Combined */}
+      <div className="bg-white/90 backdrop-blur-sm rounded-lg p-6 shadow-lg border border-white/20">
+        <div className="text-center space-y-4 mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Video Damage Detection</h1>
+          <p className="text-gray-700 mt-2">
+            Upload a video file to analyze vehicle damage frame by frame using our AI system.
+          </p>
+        </div>
 
-      {/* Upload Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Upload Video</h2>
+        {/* Upload Section */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-gray-900">Upload Video</h2>
         
         {!success && !loading && (
           <FileUpload
@@ -123,10 +123,10 @@ const VideoDetection: React.FC = () => {
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Process Another Video
-              </button>
-            </div>
+              </button>            </div>
           </div>
         )}
+        </div>
       </div>
 
       {/* Instructions */}

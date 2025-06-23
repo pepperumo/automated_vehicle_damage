@@ -1,3 +1,7 @@
+# Vehicle Damage Detection API
+# Version: 1.0.1 - Added CORS fixes and fallback endpoints for deployment
+# Updated: 2025-06-24
+
 import argparse
 import io
 import cv2
@@ -11,9 +15,6 @@ from ultralytics import YOLO
 from PIL import Image
 import base64
 import torch
-
-# Global flag for terminating video stream
-terminate_flag = False
 
 # Monkey patch torch.load to use weights_only=False for YOLO models
 original_torch_load = torch.load
@@ -41,11 +42,34 @@ else:
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'png'])
 PORT_NUMBER = 5000
 
-# Configure Flask app for API only (no templates)
-app = Flask(__name__)
+# Configure Flask app with static files for React frontend
+app = Flask(__name__, static_folder='../../static', static_url_path='/')
 
 # Enable CORS for React frontend and Docker environment  
-CORS(app, origins=['http://localhost:3000', 'http://localhost', 'http://127.0.0.1:3000', 'http://nginx'])
+CORS(app, origins=[
+    'http://localhost:3000', 
+    'http://localhost', 
+    'http://127.0.0.1:3000', 
+    'http://nginx',
+    'https://vehicle-damage-app.onrender.com',
+    'https://*.onrender.com'
+])
+
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        response = Response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add('Access-Control-Allow-Headers', "*")
+        response.headers.add('Access-Control-Allow-Methods', "*")
+        return response
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 # Configure upload folder
 upload_dir = os.path.abspath(os.path.join(basepath, '../../data/uploads'))
@@ -57,9 +81,8 @@ def allowed_file(filename):
 
 
 def generate():
-    global terminate_flag
     cap = cv2.VideoCapture(0)
-    while cap.isOpened() and not terminate_flag:
+    while cap.isOpened():
         success, frame = cap.read()
 
         if success:
@@ -80,10 +103,10 @@ def generate():
             if key == 27 or key == ord("q"):  # Terminate the loop on 'q' key
                 break
 
-    # Release the webcam
+    # Release the webcam and redirect to another page
     cap.release()
     cv2.destroyAllWindows()
-    terminate_flag = False
+    return {'status': 'stream_ended'}  # Return JSON instead of redirect
          
 @app.route('/')
 def serve_react_app():
@@ -105,32 +128,49 @@ def serve_react_routes(path):
 # Removed template-based routes - using React frontend only
 
 
+@app.route('/image', methods=['POST'])
+def image_fallback():
+    """Fallback endpoint for compatibility - redirects to predict"""
+    return predict()
+
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
+        print(f"Predict endpoint called - Content-Type: {request.content_type}")
+        print(f"Files in request: {list(request.files.keys())}")
+        
         # Check if the file input is empty
         if 'file' not in request.files:
+            print("Error: No file provided in request")
             return jsonify({'error': 'No file provided'}), 400
 
         file = request.files['file']
+        print(f"File received: {file.filename}, Size: {file.content_length}")
         
         # Check if the filename is empty
         if file.filename == '':
+            print("Error: No file selected")
             return jsonify({'error': 'No file selected'}), 400
 
         # Check if the uploaded file is an MP4 file
         if file.filename.endswith('.mp4'):
+            print("Error: MP4 file submitted to wrong endpoint")
             return jsonify({'error': 'Video files not supported in this endpoint. Use /predict_img instead.'}), 400
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
+            print(f"Processing file: {filename}")
+            
             upl_img = Image.open(file)
+            print(f"Image opened successfully: {upl_img.size}")
             
             # Run prediction
             import time
             start_time = time.time()
+            print("Running model prediction...")
             result = model.predict(source=upl_img)[0]
             processing_time = time.time() - start_time
+            print(f"Prediction completed in {processing_time:.2f} seconds")
             
             # Convert result to image
             res_img = Image.fromarray(result.plot())
@@ -138,16 +178,20 @@ def predict():
             res_img.save(image_byte_stream, format='PNG')
             image_byte_stream.seek(0)
             image_base64 = base64.b64encode(image_byte_stream.read()).decode('utf-8')
+            print(f"Result image generated, size: {len(image_base64)} chars")
             
             # Extract predictions data
             predictions = []
             if hasattr(result, 'boxes') and result.boxes is not None:
+                print(f"Found {len(result.boxes)} detections")
                 for i, box in enumerate(result.boxes):
                     predictions.append({
                         'class': result.names[int(box.cls.item())] if hasattr(result, 'names') else f'Class_{int(box.cls.item())}',
                         'confidence': float(box.conf.item()),
                         'bbox': box.xyxy[0].tolist()  # [x1, y1, x2, y2]
                     })
+            else:
+                print("No detections found")
             
             response_data = {
                 'image': image_base64,
@@ -156,12 +200,16 @@ def predict():
                 'confidence': max([p['confidence'] for p in predictions]) if predictions else 0.0
             }
             
+            print("Sending successful response")
             return jsonify(response_data)
         else:
+            print(f"Error: Invalid file format for {file.filename}")
             return jsonify({'error': 'Invalid file format. Please upload JPG, JPEG, or PNG files.'}), 400
             
     except Exception as e:
         print(f"Error in predict: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': f'Failed to process image: {str(e)}'}), 500
 
 # Removed template-based routes - using React frontend only
@@ -365,7 +413,10 @@ def api_info():
 
 @app.route('/video_feed')
 def video_feed():
-    """Live video stream with vehicle damage detection"""
+   
+
+
+
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/stop', methods=['POST'])

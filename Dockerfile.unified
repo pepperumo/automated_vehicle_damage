@@ -1,5 +1,5 @@
 # Unified Dockerfile for Vehicle Damage Detection Application
-# Single image with both React frontend and Flask backend
+# This builds a single image with both React frontend and Flask backend
 
 # Stage 1: Build React Frontend
 FROM node:18-alpine AS frontend-builder
@@ -44,9 +44,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt && \
     apt-get purge -y --auto-remove gcc g++ && \
-    pip cache purge && \
-    find /usr/local/lib/python3.12 -name "*.pyc" -delete && \
-    find /usr/local/lib/python3.12 -name "__pycache__" -delete
+    pip cache purge
 
 # Create necessary directories
 RUN mkdir -p data/uploads data/processed models src/backend static
@@ -67,7 +65,7 @@ ENV PYTHONPATH=/app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Expose port (Render will use PORT environment variable)
+# Expose port (Render will set PORT environment variable)
 EXPOSE 5000
 
 # Health check

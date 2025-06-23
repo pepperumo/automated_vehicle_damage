@@ -16,20 +16,20 @@ const ImageDetection: React.FC = () => {
     setSelectedFile(null);
     reset();
   };
-
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold text-gray-900">Vehicle Damage Detection</h1>
-        <p className="text-gray-600">
-          Upload an image of your vehicle to detect and analyze damage using our AI-powered system.
-        </p>
-      </div>
+      {/* Header and Upload Section - Combined */}
+      <div className="bg-white/90 backdrop-blur-sm rounded-lg p-6 shadow-lg border border-white/20">
+        <div className="text-center space-y-4 mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Vehicle Damage Detection</h1>
+          <p className="text-gray-700 mt-2">
+            Upload an image of your vehicle to detect and analyze damage using our AI-powered system.
+          </p>
+        </div>
 
-      {/* Upload Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Upload Image</h2>
+        {/* Upload Section */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-gray-900">Upload Image</h2>
           {!result && !loading && (
           <>
             <FileUpload
@@ -80,8 +80,8 @@ const ImageDetection: React.FC = () => {
                 </button>
               </div>
             </div>
-          </div>
-        )}
+          </div>        )}
+        </div>
       </div>
 
       {/* Results Section */}

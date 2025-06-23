@@ -1,6 +1,5 @@
-{
-  "name": "vehicle-damage-detection-frontend",
-  "version": "1.0.0",
+{  "name": "vehicle-damage-detection-frontend",
+  "version": "1.0.1",
   "description": "React TypeScript frontend for automated vehicle damage detection system",
   "private": true,
   "dependencies": {
