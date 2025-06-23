@@ -12,6 +12,9 @@ from PIL import Image
 import base64
 import torch
 
+# Global flag for terminating video stream
+terminate_flag = False
+
 # Monkey patch torch.load to use weights_only=False for YOLO models
 original_torch_load = torch.load
 
@@ -54,8 +57,9 @@ def allowed_file(filename):
 
 
 def generate():
+    global terminate_flag
     cap = cv2.VideoCapture(0)
-    while cap.isOpened():
+    while cap.isOpened() and not terminate_flag:
         success, frame = cap.read()
 
         if success:
@@ -76,10 +80,10 @@ def generate():
             if key == 27 or key == ord("q"):  # Terminate the loop on 'q' key
                 break
 
-    # Release the webcam and redirect to another page
+    # Release the webcam
     cap.release()
     cv2.destroyAllWindows()
-    return {'status': 'stream_ended'}  # Return JSON instead of redirect
+    terminate_flag = False
          
 @app.route('/')
 def serve_react_app():
@@ -361,10 +365,7 @@ def api_info():
 
 @app.route('/video_feed')
 def video_feed():
-   
-
-
-
+    """Live video stream with vehicle damage detection"""
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/stop', methods=['POST'])

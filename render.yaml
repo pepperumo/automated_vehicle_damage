@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: vehicle-damage-detector
+    env: docker
+    dockerfilePath: ./Dockerfile.render
+    healthCheckPath: /health
+    plan: starter
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHONPATH
+        value: /app
+      - key: PYTHONDONTWRITEBYTECODE
+        value: "1"
+      - key: PYTHONUNBUFFERED
+        value: "1"
