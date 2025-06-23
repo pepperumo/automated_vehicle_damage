@@ -6,7 +6,7 @@ echo "Building React frontend for production..."
 
 # Set production environment
 export NODE_ENV=production
-export REACT_APP_API_URL=https://vehicle-damage-app.onrender.com
+export REACT_APP_API_URL=https://accidentdetector-0naw.onrender.com
 
 # Navigate to frontend directory
 cd react-frontend

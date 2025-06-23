@@ -51,7 +51,7 @@ CORS(app, origins=[
     'http://localhost', 
     'http://127.0.0.1:3000', 
     'http://nginx',
-    'https://vehicle-damage-app.onrender.com',
+    'https://accidentdetector-0naw.onrender.com',
     'https://*.onrender.com'
 ])
 
