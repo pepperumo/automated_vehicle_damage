@@ -34,6 +34,9 @@ This system provides an AI-powered solution for detecting and analyzing vehicle 
 
 ## 🚀 Quick Start
 
+### 🌐 Live Demo
+Try the deployed application: **[https://automated-vehicle-damage-400484112127.europe-west1.run.app/](https://automated-vehicle-damage-400484112127.europe-west1.run.app/)**
+
 ### Prerequisites
 - **Node.js** (v16+)
 - **Python** (v3.8+)

@@ -1,58 +1,147 @@
 # Vehicle Damage Detection - Docker Setup
 
-This Docker setup provides a complete containerized solution for the Vehicle Damage Detection application with separated React frontend and Flask API backend services.
+This Docker setup provides a complete containerized solution for the Vehicle Damage Detection application with unified Flask backend serving both API and React frontend.
 
 ## 🏗️ Architecture
 
-The application uses a **separated multi-service architecture**:
+The application uses a **unified single-container architecture**:
 
-### Services:
-1. **Flask API Backend** (`backend` service)
+### Unified Service:
+1. **Flask Application Container**
    - Python 3.12.0 container
    - YOLO model inference engine  
    - REST API endpoints for damage detection
-   - Runs on port 5000 (internal)
-
-2. **React Frontend** (`frontend` service)
-   - Nginx container serving React build
-   - TypeScript-based UI
-   - Runs on port 80/3000
-
-3. **Service Communication**
-   - Nginx reverse proxy routes `/api/*` and specific endpoints to Flask backend
-   - React frontend served directly by nginx
-   - CORS configured for cross-service communication
+   - Serves React frontend as static files
+   - Runs on port 5000 (standardized across all environments)
 
 ### Key Features:
 - **Multi-stage Docker build** for optimal image size
-- **Separated concerns**: API backend independent of frontend
-- **Production-ready**: Nginx serving static files, Flask handling API only
+- **Unified architecture**: Single container serving both API and frontend
+- **Production-ready**: Flask serving static React files and API endpoints
 - **YOLO Model**: Custom YOLOv8 model (`best.pt`) for damage detection
+- **Standardized on port 5000** for all environments (local, Docker, Cloud)
 
 ## Prerequisites
 
 - Docker
-- Docker Compose
 - At least 4GB RAM available for containers
 - The `models/best.pt` file must be present
 
 ## Quick Start
 
-1. **Build and start all services:**
+1. **Build and run the container:**
    ```bash
-   docker-compose up --build
+   docker build -t vehicle-damage-detection .
+   docker run -d -p 5000:5000 vehicle-damage-detection
    ```
 
 2. **Access the application:**
-   - **React Frontend**: http://localhost (port 80) or http://localhost:3000
-   - **API Health Check**: http://localhost/health (proxied through nginx)
-   - **Direct API Access**: http://localhost:5000/health (development only)
-   - **API Base URL**: http://localhost/api/ (for React app API calls)
+   - **Web Application**: http://localhost:5000
+   - **API Health Check**: http://localhost:5000/health
+   - **API Endpoints**: http://localhost:5000/predict, /predict_img, etc.
 
 3. **Stop all services:**
    ```bash
    docker-compose down
    ```
+
+4. **Stop the container:**
+   ```bash
+   docker stop $(docker ps -q --filter ancestor=vehicle-damage-detection)
+   ```
+
+## 🌐 Google Cloud Run Deployment
+
+### Prerequisites for Cloud Deployment
+1. **Google Cloud CLI** - Install from https://cloud.google.com/sdk/docs/install
+2. **Docker** - Already installed
+3. **Google Cloud Project** with billing enabled
+4. **Container Registry API** enabled
+
+### Step-by-Step Cloud Deployment
+
+#### 1. Install Google Cloud CLI
+**Windows:**
+- Download from: https://cloud.google.com/sdk/docs/install-sdk#windows
+- Or use chocolatey: `choco install gcloudsdk`
+
+**Alternative (if gcloud unavailable):**
+- Use Google Cloud Console's built-in Cloud Shell
+- Or build locally and push via Docker Desktop
+
+#### 2. Authenticate and Configure
+```bash
+# Login to Google Cloud
+gcloud auth login
+
+# Set your project (replace with your project ID)
+gcloud config set project YOUR_PROJECT_ID
+
+# Configure Docker to use gcloud as credential helper
+gcloud auth configure-docker
+```
+
+#### 3. Tag and Push Docker Image
+```bash
+# Get your current project ID
+PROJECT_ID=$(gcloud config get-value project)
+
+# Tag the image for Google Container Registry
+docker tag vehicle-damage-detection gcr.io/$PROJECT_ID/automated-vehicle-damage:latest
+
+# Push to Google Container Registry
+docker push gcr.io/$PROJECT_ID/automated-vehicle-damage:latest
+```
+
+#### 4. Deploy to Cloud Run
+```bash
+# Deploy to Cloud Run
+gcloud run deploy automated-vehicle-damage \
+  --image gcr.io/$PROJECT_ID/automated-vehicle-damage:latest \
+  --platform managed \
+  --region europe-west1 \
+  --allow-unauthenticated \
+  --memory 2Gi \
+  --cpu 2 \
+  --timeout 300 \
+  --port 5000 \
+  --set-env-vars="PORT=5000"
+```
+
+#### 5. Alternative: Manual Console Deployment
+If CLI isn't available:
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Navigate to **Cloud Run**
+3. Click **Create Service**
+4. Choose **Deploy one revision from an existing container image**
+5. Use image: `gcr.io/YOUR_PROJECT_ID/automated-vehicle-damage:latest`
+6. Set **Container port** to `5000`
+7. Set **Memory** to `2 GiB`, **CPU** to `2`
+8. Add environment variable: `PORT=5000`
+9. Click **Create**
+
+### Docker Desktop Push (Alternative Method)
+If you have Docker Desktop with Google Cloud integration:
+```bash
+# Tag for Artifact Registry (newer alternative to Container Registry)
+docker tag vehicle-damage-detection europe-west1-docker.pkg.dev/YOUR_PROJECT_ID/vehicle-damage/automated-vehicle-damage:latest
+
+# Push via Docker Desktop (if authenticated)
+docker push europe-west1-docker.pkg.dev/YOUR_PROJECT_ID/vehicle-damage/automated-vehicle-damage:latest
+```
+
+### Verify Deployment
+After deployment, test your Cloud Run service:
+```bash
+# Get the service URL
+SERVICE_URL=$(gcloud run services describe automated-vehicle-damage --region=europe-west1 --format="value(status.url)")
+
+# Test health endpoint
+curl $SERVICE_URL/health
+
+# Or open in browser
+echo "Visit: $SERVICE_URL"
+```
 
 ## 📦 Container Structure
 

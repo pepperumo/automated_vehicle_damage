@@ -76,11 +76,10 @@ ENV PORT=5000
 # Create necessary directories
 RUN mkdir -p data/uploads data/processed
 
-# Expose port (flexible for different deployment platforms)
+# Expose port 5000 (standardized across all environments)
 EXPOSE 5000
-EXPOSE 8080
 
-# Health check (supports both ports)
+# Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 \
     CMD python -c "import requests, os; requests.get(f'http://localhost:{os.getenv(\"PORT\", \"5000\")}/health', timeout=10)"
 
