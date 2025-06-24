@@ -51,8 +51,10 @@ CORS(app, origins=[
     'http://localhost', 
     'http://127.0.0.1:3000', 
     'http://nginx',
-    'https://accidentdetector-0naw.onrender.com',
-    'https://*.onrender.com'
+    'https://*.onrender.com',
+    'https://*.a.run.app',
+    'https://automated-vehicle-damage-400484112127.europe-west1.run.app',
+    'https://*.cloudfunctions.net'
 ], supports_credentials=True)
 
 # Remove redundant CORS handlers as Flask-CORS handles this properly

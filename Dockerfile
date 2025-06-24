@@ -4,13 +4,17 @@
 # Stage 1: Build React Frontend
 FROM node:18-alpine AS frontend-builder
 
+# Build arguments for production
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
 WORKDIR /app/frontend
 
 # Copy package files
 COPY react-frontend/package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm ci --only=production
 
 # Copy source code
 COPY react-frontend/ ./
@@ -66,13 +70,18 @@ ENV FLASK_ENV=production
 ENV PYTHONPATH=/app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PORT=5000
 
-# Expose port (Render will use PORT environment variable)
+# Create necessary directories
+RUN mkdir -p data/uploads data/processed
+
+# Expose port (flexible for different deployment platforms)
 EXPOSE 5000
+EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/health || exit 1
+# Health check (supports both ports)
+HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 \
+    CMD python -c "import requests, os; requests.get(f'http://localhost:{os.getenv(\"PORT\", \"5000\")}/health', timeout=10)"
 
 # Run the Flask application
 CMD ["python", "src/backend/app.py"]
