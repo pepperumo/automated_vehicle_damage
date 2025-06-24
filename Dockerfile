@@ -14,13 +14,14 @@ WORKDIR /app/frontend
 COPY react-frontend/package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm ci
 
 # Copy source code
 COPY react-frontend/ ./
 
 # Build the React app
-RUN npm run build
+RUN npm run build && \
+    npm cache clean --force
 
 # Stage 2: Python Backend with Frontend served by Flask
 FROM python:3.12.0-slim
