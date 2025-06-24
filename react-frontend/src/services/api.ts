@@ -6,9 +6,6 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 export const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 60000, // 60 seconds timeout for file uploads
-  headers: {
-    'Access-Control-Allow-Origin': '*',
-  },
 });
 
 export const apiService = {

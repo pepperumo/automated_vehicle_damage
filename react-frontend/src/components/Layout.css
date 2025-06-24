@@ -1,0 +1,8 @@
+.background-image {
+  background-image: url('../../public/background.jpg');
+}
+
+.background-container {
+  --bg-image: url('../../public/background.jpg');
+  background-image: var(--bg-image);
+}

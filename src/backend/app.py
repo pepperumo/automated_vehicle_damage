@@ -53,23 +53,10 @@ CORS(app, origins=[
     'http://nginx',
     'https://accidentdetector-0naw.onrender.com',
     'https://*.onrender.com'
-])
+], supports_credentials=True)
 
-@app.before_request
-def handle_preflight():
-    if request.method == "OPTIONS":
-        response = Response()
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add('Access-Control-Allow-Headers', "*")
-        response.headers.add('Access-Control-Allow-Methods', "*")
-        return response
-
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    return response
+# Remove redundant CORS handlers as Flask-CORS handles this properly
+# The Flask-CORS extension above is sufficient for handling all CORS requirements
 
 # Configure upload folder
 upload_dir = os.path.abspath(os.path.join(basepath, '../../data/uploads'))

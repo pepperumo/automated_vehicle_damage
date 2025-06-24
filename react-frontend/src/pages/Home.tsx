@@ -27,7 +27,7 @@ const Home: React.FC = () => {  const features = [
   ];
   return (
     <div className="space-y-12">      {/* Hero Section */}
-      <div className="text-center space-y-8 py-12 bg-white/95 backdrop-blur-md rounded-xl mx-4 sm:mx-6 lg:mx-8">
+      <div className="text-center space-y-8 py-12 px-6 sm:px-8 lg:px-12 bg-white/95 backdrop-blur-md rounded-xl">
         <div className="space-y-4">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900">
             Automated Vehicle
@@ -55,7 +55,7 @@ const Home: React.FC = () => {  const features = [
           </Link>
         </div>
       </div>        {/* Detection Examples */}
-        <div className="space-y-8 px-4 sm:px-6 lg:px-8 py-12 bg-white/95 backdrop-blur-md rounded-xl mx-4 sm:mx-6 lg:mx-8">
+        <div className="space-y-8 px-4 sm:px-6 lg:px-8 py-12 bg-white/95 backdrop-blur-md rounded-xl">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Detection Examples</h2>
             <p className="text-lg text-gray-600">
@@ -127,7 +127,7 @@ const Home: React.FC = () => {  const features = [
             </div>
           </div>
         </div>        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 sm:px-6 lg:px-8 py-12 bg-white/95 backdrop-blur-md rounded-xl mx-4 sm:mx-6 lg:mx-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 sm:px-6 lg:px-8 py-12 bg-white/95 backdrop-blur-md rounded-xl">
           {features.map(({ icon: Icon, title, description, link, color }) => (
             <Link
               key={title}
