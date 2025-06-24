@@ -1,3 +1,6 @@
+### 🌐 Live Demo
+Try the deployed application: **[https://automated-vehicle-damage-400484112127.europe-west1.run.app/](https://automated-vehicle-damage-400484112127.europe-west1.run.app/)**
+
 # Vehicle Damage Detection System
 
 A comprehensive system for automated vehicle damage detection and severity estimation using deep learning, featuring a modern React TypeScript frontend and Flask backend API.
@@ -34,8 +37,7 @@ This system provides an AI-powered solution for detecting and analyzing vehicle 
 
 ## 🚀 Quick Start
 
-### 🌐 Live Demo
-Try the deployed application: **[https://automated-vehicle-damage-400484112127.europe-west1.run.app/](https://automated-vehicle-damage-400484112127.europe-west1.run.app/)**
+
 
 ### Prerequisites
 - **Node.js** (v16+)
