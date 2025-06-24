@@ -53,7 +53,6 @@ CORS(app, origins=[
     'http://nginx',
     'https://*.onrender.com',
     'https://*.a.run.app',
-    'https://automated-vehicle-damage-400484112127.europe-west1.run.app',
     'https://automated-vehicle-damage-accidentdetector.europe-west1.run.app',
     'https://*.cloudfunctions.net'
 ], supports_credentials=True)
