@@ -66,6 +66,8 @@ This will automatically:
 
 ### Manual Setup
 
+```
+
 See the detailed [Setup Guide](SETUP_GUIDE.md) for manual installation instructions.
 ├── data/                      # Data storage
 │   ├── external/             # External data sources
@@ -96,7 +98,9 @@ See the detailed [Setup Guide](SETUP_GUIDE.md) for manual installation instructi
 │   │   └── templates/        # HTML templates
 │   └── requirements.txt      # Python dependencies (src level)
 └── tests/                     # Test files
+
 ```
+
 
 ## Features
 
