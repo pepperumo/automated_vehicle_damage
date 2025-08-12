@@ -1,5 +1,5 @@
 ### 🌐 Live Demo
-Try the deployed application: **[https://automated-vehicle-damage-400484112127.europe-west1.run.app/](https://automated-vehicle-damage-400484112127.europe-west1.run.app/)**
+You can read more about the project: **[Link]([https://automated-vehicle-damage-400484112127.europe-west1.run.app/](https://www.linkedin.com/pulse/car-damage-detection-using-ai-giuseppe-rumore-9ld7f/?trackingId=8UVElv3GQwez%2Bi4IDUYQQQ%3D%3D))**
 
 # Vehicle Damage Detection System
 
